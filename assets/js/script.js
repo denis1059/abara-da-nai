@@ -1,4 +1,93 @@
 let cart = [];
+let allProducts = [];
+let activeCategory = 'todas';
+
+/**
+ * Inicialização
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    loadProducts();
+});
+
+/**
+ * Carrega produtos do JSON
+ */
+async function loadProducts() {
+    try {
+        const response = await fetch('data/produtos.json');
+        allProducts = await response.json();
+        renderProducts();
+    } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+        document.getElementById('product-grid').innerHTML = '<p>Erro ao carregar o cardápio. Tente novamente mais tarde.</p>';
+    }
+}
+
+/**
+ * Filtra por categoria
+ */
+function filterCategory(category) {
+    activeCategory = category;
+    
+    // Atualiza botões
+    const buttons = document.querySelectorAll('.cat-btn');
+    buttons.forEach(btn => {
+        if (btn.innerText.toLowerCase() === category || (category === 'todas' && btn.innerText.toLowerCase() === 'todos')) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    renderProducts();
+}
+
+/**
+ * Renderiza os produtos no grid
+ */
+function renderProducts() {
+    const grid = document.getElementById('product-grid');
+    grid.innerHTML = '';
+
+    const filtered = activeCategory === 'todas' 
+        ? allProducts 
+        : allProducts.filter(p => p.categoria === activeCategory);
+
+    if (filtered.length === 0) {
+        grid.innerHTML = '<p>Nenhum produto encontrado nesta categoria.</p>';
+        return;
+    }
+
+    filtered.forEach(p => {
+        if (p.ativo === false) return;
+
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        
+        const priceHtml = p.preco_antigo 
+            ? `<span class="old-price">R$ ${parseFloat(p.preco_antigo).toFixed(2).replace('.', ',')}</span>` 
+            : '';
+
+        card.innerHTML = `
+            <div class="product-image">
+                <img src="${p.imagem}" alt="${p.titulo}">
+                ${p.badge ? `<span class="badge">${p.badge}</span>` : ''}
+            </div>
+            <div class="product-info">
+                <h3>${p.titulo}</h3>
+                <p>${p.descricao}</p>
+                <div class="price">
+                    ${priceHtml}
+                    <span class="current-price">R$ ${parseFloat(p.preco_atual).toFixed(2).replace('.', ',')}</span>
+                </div>
+                <button class="btn btn-add" onclick="addToCartById('${p.id}')">
+                    <i class="fas fa-plus"></i> Adicionar ao Pedido
+                </button>
+            </div>
+        `;
+        grid.appendChild(card);
+    });
+}
 
 /**
  * Abre/Fecha o carrinho
@@ -8,6 +97,16 @@ function toggleCart() {
     const overlay = document.getElementById('cart-overlay');
     sidebar.classList.toggle('active');
     overlay.classList.toggle('active');
+}
+
+/**
+ * Adiciona ao carrinho buscando pelo ID
+ */
+function addToCartById(id) {
+    const product = allProducts.find(p => p.id === id);
+    if (product) {
+        addToCart(product);
+    }
 }
 
 /**
@@ -27,17 +126,20 @@ function addToCart(product) {
         });
     }
     updateCartUI();
-    // Feedback visual
+    
+    // Feedback visual (opcional)
     const btn = event.currentTarget;
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-check"></i> Adicionado!';
-    btn.style.background = '#25d366';
-    btn.style.color = '#fff';
-    setTimeout(() => {
-        btn.innerHTML = originalText;
-        btn.style.background = '';
-        btn.style.color = '';
-    }, 1500);
+    if (btn) {
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Adicionado!';
+        btn.style.background = '#25d366';
+        btn.style.color = '#fff';
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.style.background = '';
+            btn.style.color = '';
+        }, 1500);
+    }
 }
 
 /**
@@ -100,7 +202,7 @@ function updateCartUI() {
     });
 
     if (cart.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:#888;">Seu carrinho está vazio.</p>';
+        container.innerHTML = '<p style="text-align:center; color:#888; padding: 20px;">Seu carrinho está vazio.</p>';
     }
 
     count.innerText = totalItems;
@@ -134,6 +236,3 @@ function checkout() {
     
     window.open(url, '_blank');
 }
-
-// Inicializa a UI
-updateCartUI();

@@ -1,11 +1,10 @@
-# Ignorar arquivos de configuração sensíveis e dados locais
+# Ignorar arquivos de configuração sensíveis
 app/Config/App.php
-data/produtos.json
 data/posts.json
 data/config.json
 
-# Ignorar uploads locais
-assets/images/uploads/*
+# Ignorar uploads (opcional, mas vamos manter os iniciais)
+# assets/images/uploads/*
 !assets/images/uploads/.gitkeep
 
 # Logs e arquivos temporários

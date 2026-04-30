@@ -1,0 +1,50 @@
+[
+    {
+        "id": "p_1",
+        "titulo": "Abará Tradicional",
+        "descricao": "Macio e bem temperado, feito com massa de feijão fradinho cozida no vapor.",
+        "preco_atual": "15.00",
+        "preco_antigo": "18.00",
+        "imagem": "assets/images/uploads/1.jpeg",
+        "categoria": "abara",
+        "destaque": "mais-vendido",
+        "badge": "-16%",
+        "ativo": true
+    },
+    {
+        "id": "p_2",
+        "titulo": "Abará com Camarão",
+        "descricao": "Recheado e saboroso, com camarões selecionados e tempero especial.",
+        "preco_atual": "20.00",
+        "preco_antigo": "",
+        "imagem": "assets/images/uploads/2.jpeg",
+        "categoria": "abara",
+        "destaque": "mais-vendido",
+        "badge": "Destaque",
+        "ativo": true
+    },
+    {
+        "id": "p_3",
+        "titulo": "Acarajé Completo",
+        "descricao": "Frito na hora, acompanha vatapá, caruru, camarão e salada.",
+        "preco_atual": "18.00",
+        "preco_antigo": "22.00",
+        "imagem": "assets/images/uploads/3.jpeg",
+        "categoria": "acaraje",
+        "destaque": "mais-vendido",
+        "badge": "-18%",
+        "ativo": true
+    },
+    {
+        "id": "p_4",
+        "titulo": "Porções Personalizadas",
+        "descricao": "Monte sua porção com mini acarajés ou abarás para sua festa.",
+        "preco_atual": "50.00",
+        "preco_antigo": "",
+        "imagem": "assets/images/uploads/4.jpeg",
+        "categoria": "porcoes",
+        "destaque": "mais-vendido",
+        "badge": "Festa",
+        "ativo": true
+    }
+]
