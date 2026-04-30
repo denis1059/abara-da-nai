@@ -1,0 +1,15 @@
+# Ignorar arquivos de configuração sensíveis e dados locais
+app/Config/App.php
+data/produtos.json
+data/posts.json
+data/config.json
+
+# Ignorar uploads locais
+assets/images/uploads/*
+!assets/images/uploads/.gitkeep
+
+# Logs e arquivos temporários
+error_log
+.DS_Store
+.vscode/
+.idea/
