@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Abará da Nai</title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .admin-layout { display: flex; min-height: 100vh; background: #f4f4f4; }
+        .sidebar { width: 250px; background: var(--dark); color: #fff; padding: 2rem 1rem; position: fixed; height: 100%; }
+        .main-content { flex: 1; margin-left: 250px; padding: 2rem; }
+        .card { background: #fff; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #eee; }
+        .thumb { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; }
+        
+        .btn-sm { padding: 5px 10px; font-size: 0.8rem; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 3000; align-items: center; justify-content: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: #fff; padding: 2rem; border-radius: 15px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+        
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px; }
+        
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--light); z-index: 4000; display: flex; align-items: center; justify-content: center; }
+        .login-card { background: #fff; padding: 3rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        
+        .github-config { background: #e3f2fd; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <!-- Login Screen -->
+    <div id="login-screen">
+        <div class="login-card">
+            <h2 style="color: var(--primary); margin-bottom: 1.5rem;">Acesso Admin</h2>
+            <div class="form-group">
+                <input type="password" id="admin-pass" placeholder="Senha do Painel">
+            </div>
+            <button class="btn btn-primary" onclick="checkLogin()" style="width: 100%;">Entrar</button>
+            <p id="login-error" style="color: var(--accent); margin-top: 1rem; display: none;">Senha incorreta!</p>
+        </div>
+    </div>
+
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <h2 style="color: var(--primary); margin-bottom: 2rem;">Admin Nai</h2>
+            <nav>
+                <a href="#" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem; text-align: left;" onclick="showProductModal()"><i class="fas fa-plus"></i> Novo Produto</a>
+                <a href="../" style="color: #ccc; text-decoration: none; display: block; margin-top: 2rem;"><i class="fas fa-external-link-alt"></i> Ver Site</a>
+                <a href="#" style="color: #ff5252; text-decoration: none; display: block; margin-top: 1rem;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h1>Gerenciar Cardápio</h1>
+                    <button class="btn btn-primary" onclick="saveToGitHub()"><i class="fas fa-save"></i> Salvar no GitHub</button>
+                </div>
+                
+                <div class="github-config">
+                    <strong>Configuração GitHub:</strong> Para salvar as alterações, você precisará de um <em>Token de Acesso</em>.
+                    <a href="#" onclick="setupGitHub()" style="color: var(--primary); font-weight: 600;">Configurar Token</a>
+                </div>
+
+                <table id="products-table">
+                    <thead>
+                        <tr>
+                            <th>Imagem</th>
+                            <th>Título</th>
+                            <th>Preço</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-product-list">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Novo Produto</h2>
+            <form id="product-form" onsubmit="handleProductSubmit(event)">
+                <input type="hidden" id="p-id">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="p-titulo" required>
+                </div>
+                <div class="form-group">
+                    <label>Descrição</label>
+                    <textarea id="p-descricao" rows="3" required></textarea>
+                </div>
+                <div class="form-row" style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Preço Atual</label>
+                        <input type="number" step="0.01" id="p-preco-atual" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Preço Antigo</label>
+                        <input type="number" step="0.01" id="p-preco-antigo">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Categoria</label>
+                    <select id="p-categoria">
+                        <option value="abara">Abará</option>
+                        <option value="acaraje">Acarajé</option>
+                        <option value="porcoes">Porções</option>
+                        <option value="bebidas">Bebidas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Imagem (URL ou caminho)</label>
+                    <input type="text" id="p-imagem" placeholder="assets/images/uploads/1.jpeg">
+                </div>
+                <div class="form-group">
+                    <label>Selo / Badge</label>
+                    <input type="text" id="p-badge" placeholder="Ex: -10%">
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 2rem;">
+                    <button type="button" class="btn" style="background: #ccc; flex: 1;" onclick="closeModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Salvar Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
