@@ -218,14 +218,14 @@ function checkout() {
         return;
     }
 
-    let message = "🍱 *Pedido - Abará da Nai*\n\n";
+    let message = "\uD83C\uDF71 *Pedido - Abará da Nai*\n\n";
     message += "*Itens:*\n";
     
     let total = 0;
     cart.forEach(item => {
         const subtotal = item.price * item.quantity;
         total += subtotal;
-        message += `• ${item.title} (${item.quantity}x) - R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
+        message += `\u2022 ${item.title} (${item.quantity}x) - R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
     });
 
     message += `\n*Total do Pedido: R$ ${total.toFixed(2).replace('.', ',')}*\n\n`;
