@@ -12,6 +12,7 @@ const ADMIN_PASS = 'admin';
  */
 function checkLogin() {
     const pass = document.getElementById('admin-pass').value;
+    console.log('Tentativa de login...'); // Log para debug
     if (pass === ADMIN_PASS) {
         document.getElementById('login-screen').style.display = 'none';
         init();
@@ -19,6 +20,13 @@ function checkLogin() {
         document.getElementById('login-error').style.display = 'block';
     }
 }
+
+// Permitir apertar Enter para logar
+document.getElementById('admin-pass')?.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter') {
+        checkLogin();
+    }
+});
 
 /**
  * Inicialização do Painel
@@ -32,11 +40,18 @@ async function init() {
  */
 async function loadProducts() {
     try {
-        const response = await fetch(`../${filePath}?t=${Date.now()}`);
+        const url = `../${filePath}?t=${Date.now()}`;
+        console.log('Carregando produtos de:', url);
+        const response = await fetch(url);
+        
+        if (!response.ok) throw new Error('Arquivo não encontrado');
+        
         products = await response.json();
+        console.log('Produtos carregados:', products);
         renderAdminProducts();
     } catch (e) {
-        alert('Erro ao carregar produtos. Verifique o caminho do arquivo.');
+        console.error('Erro detalhado:', e);
+        alert('Erro ao carregar produtos: ' + e.message + '\nVerifique se o arquivo data/produtos.json existe no seu repositório.');
     }
 }
 
