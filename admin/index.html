@@ -8,11 +8,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .admin-layout { display: flex; min-height: 100vh; background: #f4f4f4; }
-        .sidebar { width: 250px; background: var(--dark); color: #fff; padding: 2rem 1rem; position: fixed; height: 100%; }
-        .main-content { flex: 1; margin-left: 250px; padding: 2rem; }
+        .sidebar { width: 250px; background: var(--dark); color: #fff; padding: 2rem 1rem; position: fixed; height: 100%; box-sizing: border-box; }
+        .main-content { flex: 1; margin-left: 250px; padding: 2rem; box-sizing: border-box; width: calc(100% - 250px); }
         .card { background: #fff; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .table-container { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; min-width: 500px; }
         th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #eee; }
         .thumb { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; }
         
@@ -23,12 +25,34 @@
         
         .form-group { margin-bottom: 1rem; }
         .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
-        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 0.8rem; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .form-row { display: flex; gap: 10px; }
+        .form-row .form-group { flex: 1; }
         
         #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--light); z-index: 4000; display: flex; align-items: center; justify-content: center; }
-        .login-card { background: #fff; padding: 3rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        .login-card { background: #fff; padding: 3rem; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
         
         .github-config { background: #e3f2fd; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.9rem; }
+
+        /* Sidebar Styles */
+        .sidebar-title { color: var(--primary); margin-bottom: 2rem; text-align: center; }
+        .nav-link { display: block; padding: 0.8rem; border-radius: 8px; text-decoration: none; text-align: center; margin-bottom: 1rem; font-weight: bold; }
+        .nav-link-site { color: #ccc; margin-top: 2rem; }
+        .nav-link-logout { color: #ff5252; margin-top: 1rem; }
+        
+        /* Responsive Media Queries */
+        @media (max-width: 768px) {
+            .admin-layout { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: relative; padding: 1.5rem 1rem; display: flex; flex-direction: column; align-items: center; }
+            .sidebar-title { margin-bottom: 1.5rem; }
+            .sidebar nav { width: 100%; display: flex; flex-direction: column; gap: 0.5rem; }
+            .nav-link-site, .nav-link-logout { margin-top: 0; }
+            .main-content { margin-left: 0; width: 100%; padding: 1rem; }
+            .card { padding: 1.5rem 1rem; }
+            .card-header { flex-direction: column; gap: 1rem; text-align: center; }
+            .card-header button { width: 100%; }
+            .form-row { flex-direction: column; gap: 0; }
+        }
     </style>
 </head>
 <body>
@@ -47,18 +71,18 @@
 
     <div class="admin-layout">
         <aside class="sidebar">
-            <h2 style="color: var(--primary); margin-bottom: 2rem;">Admin Nai</h2>
+            <h2 class="sidebar-title">Admin Nai</h2>
             <nav>
-                <a href="#" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem; text-align: left;" onclick="showProductModal()"><i class="fas fa-plus"></i> Novo Produto</a>
-                <a href="../" style="color: #ccc; text-decoration: none; display: block; margin-top: 2rem;"><i class="fas fa-external-link-alt"></i> Ver Site</a>
-                <a href="#" style="color: #ff5252; text-decoration: none; display: block; margin-top: 1rem;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</a>
+                <a href="#" class="btn btn-primary nav-link" onclick="showProductModal()"><i class="fas fa-plus"></i> Novo Produto</a>
+                <a href="../" class="nav-link nav-link-site"><i class="fas fa-external-link-alt"></i> Ver Site</a>
+                <a href="#" class="nav-link nav-link-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</a>
             </nav>
         </aside>
 
         <main class="main-content">
             <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h1>Gerenciar Cardápio</h1>
+                <div class="card-header">
+                    <h1 style="font-size: 1.5rem;">Gerenciar Cardápio</h1>
                     <button class="btn btn-primary" onclick="saveToGitHub()"><i class="fas fa-save"></i> Salvar no GitHub</button>
                 </div>
                 
@@ -67,19 +91,21 @@
                     <a href="#" onclick="setupGitHub()" style="color: var(--primary); font-weight: 600;">Configurar Token</a>
                 </div>
 
-                <table id="products-table">
-                    <thead>
-                        <tr>
-                            <th>Imagem</th>
-                            <th>Título</th>
-                            <th>Preço</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="admin-product-list">
-                        <!-- Filled by JS -->
-                    </tbody>
-                </table>
+                <div class="table-container">
+                    <table id="products-table">
+                        <thead>
+                            <tr>
+                                <th>Imagem</th>
+                                <th>Título</th>
+                                <th>Preço</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-product-list">
+                            <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </main>
     </div>
@@ -87,7 +113,7 @@
     <!-- Product Modal -->
     <div id="product-modal" class="modal">
         <div class="modal-content">
-            <h2 id="modal-title">Novo Produto</h2>
+            <h2 id="modal-title" style="margin-bottom: 1.5rem;">Novo Produto</h2>
             <form id="product-form" onsubmit="handleProductSubmit(event)">
                 <input type="hidden" id="p-id">
                 <div class="form-group">
@@ -98,12 +124,12 @@
                     <label>Descrição</label>
                     <textarea id="p-descricao" rows="3" required></textarea>
                 </div>
-                <div class="form-row" style="display: flex; gap: 10px;">
-                    <div class="form-group" style="flex: 1;">
+                <div class="form-row">
+                    <div class="form-group">
                         <label>Preço Atual</label>
                         <input type="number" step="0.01" id="p-preco-atual" required>
                     </div>
-                    <div class="form-group" style="flex: 1;">
+                    <div class="form-group">
                         <label>Preço Antigo</label>
                         <input type="number" step="0.01" id="p-preco-antigo">
                     </div>
