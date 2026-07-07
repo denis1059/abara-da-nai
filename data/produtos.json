@@ -42,5 +42,16 @@
         "imagem": "assets/images/uploads/4.jpeg",
         "badge": "Festa",
         "ativo": true
+    },
+    {
+        "id": "p_1783467429478",
+        "titulo": "Licores ",
+        "descricao": "Licores artesanais ",
+        "preco_atual": "20.00",
+        "preco_antigo": "20.00",
+        "categoria": "bebidas",
+        "imagem": "",
+        "badge": "",
+        "ativo": true
     }
 ]
