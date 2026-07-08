@@ -53,5 +53,60 @@
         "imagem": "",
         "badge": "",
         "ativo": true
+    },
+    {
+        "id": "p_1783476401042",
+        "titulo": "Geladinho de frutas ",
+        "descricao": "🍓🥭 Geladinho de Frutas\n\nFeito com frutas selecionadas, nosso geladinho de frutas é leve, refrescante e cheio de sabor. A escolha perfeita para espantar o calor e aproveitar o gostinho das frutas em cada mordida.\n\n🍍 Frutas de qualidade\n❄️ Super refrescante\n💛 Produzido com carinho e muito sabor\n\nExperimente e descubra o seu sabor favorito!",
+        "preco_atual": "3.00",
+        "preco_antigo": "",
+        "categoria": "porcoes",
+        "imagem": "",
+        "badge": "",
+        "ativo": true
+    },
+    {
+        "id": "p_1783476460004",
+        "titulo": "Geladinho gourmet ",
+        "descricao": "🍨 Geladinho Gourmet\n\nCremoso, irresistível e feito com ingredientes de qualidade. Nosso geladinho gourmet transforma um simples momento em uma deliciosa experiência.\n\n✨ Cremosidade na medida certa\n🥜 Sabores especiais e marcantes\n❄️ Perfeito para refrescar com muito sabor\n\nQuem prova, sempre quer mais! 💛",
+        "preco_atual": "6.00",
+        "preco_antigo": "",
+        "categoria": "porcoes",
+        "imagem": "",
+        "badge": "",
+        "ativo": true
+    },
+    {
+        "id": "p_1783476527061",
+        "titulo": "Mini geladinho pra eventos ",
+        "descricao": "🎉 Mini Geladinho para Eventos\n\nLeve mais sabor e refrescância para sua festa! Nossos mini geladinhos são perfeitos para aniversários, casamentos, chás, confraternizações, eventos escolares e corporativos.\n\n❄️ Tamanho ideal para servir\n🎈 Sabores variados\n💛 Produzidos com qualidade e muito carinho\n\nFaça sua encomenda e torne seu evento ainda mais especial com uma lembrança deliciosa!",
+        "preco_atual": "2.50",
+        "preco_antigo": "",
+        "categoria": "abara",
+        "imagem": "",
+        "badge": "",
+        "ativo": true
+    },
+    {
+        "id": "p_1783476597265",
+        "titulo": "Balinha de genipapo ",
+        "descricao": "Feita com o autêntico sabor do genipapo, nossa balinha é uma verdadeira lembrança da tradição nordestina. Macia, saborosa e produzida com carinho, é perfeita para quem aprecia o sabor marcante dessa fruta tão especial.\nExperimente e descubra um pedacinho da nossa terra em cada balinha! 💛",
+        "preco_atual": "10.00",
+        "preco_antigo": "",
+        "categoria": "porcoes",
+        "imagem": "",
+        "badge": "",
+        "ativo": true
+    },
+    {
+        "id": "p_1783476698990",
+        "titulo": "Bolinho de estudante ",
+        "descricao": "🥥 Bolinho de Estudante\n\nUma delícia da tradição baiana! Feito com tapioca, coco e um toque especial de carinho, nosso bolinho de estudante é crocante por fora, macio por dentro e finalizado com açúcar e canela.\n\n✨ Sabor caseiro\n🥥 Ingredientes selecionados\n💛 Perfeito para qualquer hora do dia\n\nExperimente essa tradição que conquista no primeiro pedaço!",
+        "preco_atual": "3.00",
+        "preco_antigo": "",
+        "categoria": "porcoes",
+        "imagem": "",
+        "badge": "",
+        "ativo": true
     }
 ]
