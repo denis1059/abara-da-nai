@@ -108,16 +108,5 @@
         "imagem": "",
         "badge": "",
         "ativo": true
-    },
-    {
-        "id": "p_1790800109752",
-        "titulo": "teste",
-        "descricao": "dfgsdfgsd",
-        "preco_atual": "10",
-        "preco_antigo": "",
-        "categoria": "abara",
-        "imagem": "assets/images/uploads/img_1790800090012.jpg",
-        "badge": "",
-        "ativo": true
     }
 ]
