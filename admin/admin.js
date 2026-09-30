@@ -1,8 +1,10 @@
 let products = [];
+let categories = [];
 let githubToken = localStorage.getItem('gh_token') || '';
 let repoOwner = 'denis1059';
 let repoName = 'abara-da-nai';
 let filePath = 'data/produtos.json';
+let categoriesFilePath = 'data/categorias.json';
 let branch = 'master';
 
 // Imagens pendentes de upload para o GitHub { "assets/images/uploads/img_xxx.jpg": "base64..." }
@@ -65,7 +67,161 @@ document.getElementById('admin-pass')?.addEventListener('keypress', function (e)
  */
 async function init() {
     updateGitHubStatusUI();
+    await loadCategories();
     await loadProducts();
+}
+
+/**
+ * Carrega categorias do JSON
+ */
+async function loadCategories() {
+    try {
+        const url = `../${categoriesFilePath}?t=${Date.now()}`;
+        const response = await fetch(url);
+        if (response.ok) {
+            categories = await response.json();
+        } else {
+            categories = [
+                { id: 'abara', nome: 'Abará' },
+                { id: 'acaraje', nome: 'Acarajé' },
+                { id: 'porcoes', nome: 'Porções' },
+                { id: 'bebidas', nome: 'Bebidas' }
+            ];
+        }
+    } catch (_) {
+        categories = [
+            { id: 'abara', nome: 'Abará' },
+            { id: 'acaraje', nome: 'Acarajé' },
+            { id: 'porcoes', nome: 'Porções' },
+            { id: 'bebidas', nome: 'Bebidas' }
+        ];
+    }
+    populateCategorySelect();
+    renderCategoriesTable();
+}
+
+/**
+ * Preenche o select de categorias no modal de produtos
+ */
+function populateCategorySelect(selectedId = '') {
+    const select = document.getElementById('p-categoria');
+    if (!select) return;
+
+    select.innerHTML = '';
+    categories.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat.id;
+        opt.innerText = cat.nome;
+        if (cat.id === selectedId) opt.selected = true;
+        select.appendChild(opt);
+    });
+}
+
+/**
+ * Renderiza tabela do modal de categorias
+ */
+function renderCategoriesTable() {
+    const tbody = document.getElementById('category-table-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+    categories.forEach(cat => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${cat.nome}</strong></td>
+            <td><code style="background:#eee; padding:2px 6px; border-radius:4px;">${cat.id}</code></td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="handleEditCategory('${cat.id}')" title="Editar Nome"><i class="fas fa-edit"></i></button>
+                <button class="btn btn-sm" style="background:#ff5252; color:#fff;" onclick="handleDeleteCategory('${cat.id}')" title="Excluir"><i class="fas fa-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+/**
+ * Abre modal de categorias
+ */
+function showCategoryModal() {
+    renderCategoriesTable();
+    document.getElementById('category-modal').classList.add('active');
+}
+
+/**
+ * Fecha modal de categorias
+ */
+function closeCategoryModal() {
+    document.getElementById('category-modal').classList.remove('active');
+    populateCategorySelect();
+}
+
+/**
+ * Adiciona nova categoria
+ */
+function handleAddCategory() {
+    const input = document.getElementById('new-cat-name');
+    const name = input.value.trim();
+    if (!name) {
+        alert('Digite o nome da categoria.');
+        return;
+    }
+
+    // Gera slug amigável
+    const slug = name.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '');
+
+    if (categories.some(c => c.id === slug)) {
+        alert('Já existe uma categoria com esse código/nome.');
+        return;
+    }
+
+    categories.push({ id: slug, nome: name });
+    input.value = '';
+    renderCategoriesTable();
+    populateCategorySelect(slug);
+    alert(`✅ Categoria "${name}" adicionada!\n\nClique em "Salvar no GitHub" na tela principal para publicar a nova categoria no site.`);
+}
+
+/**
+ * Edita o nome de uma categoria
+ */
+function handleEditCategory(id) {
+    const cat = categories.find(c => c.id === id);
+    if (!cat) return;
+
+    const newName = prompt(`Novo nome para a categoria "${cat.nome}":`, cat.nome);
+    if (newName && newName.trim() !== '') {
+        cat.nome = newName.trim();
+        renderCategoriesTable();
+        populateCategorySelect();
+        renderAdminProducts();
+        alert('Nome da categoria atualizado. Clique em "Salvar no GitHub" para publicar.');
+    }
+}
+
+/**
+ * Exclui uma categoria
+ */
+function handleDeleteCategory(id) {
+    const cat = categories.find(c => c.id === id);
+    if (!cat) return;
+
+    const inUse = products.filter(p => p.categoria === id).length;
+    let msg = `Deseja realmente excluir a categoria "${cat.nome}"?`;
+    if (inUse > 0) {
+        msg += `\n\nAtenção: Existem ${inUse} produto(s) cadastrado(s) nesta categoria.`;
+    }
+
+    if (confirm(msg)) {
+        categories = categories.filter(c => c.id !== id);
+        renderCategoriesTable();
+        populateCategorySelect();
+        renderAdminProducts();
+        alert('Categoria removida da lista. Clique em "Salvar no GitHub" para confirmar a exclusão no site.');
+    }
 }
 
 /**
@@ -74,13 +230,11 @@ async function init() {
 async function loadProducts() {
     try {
         const url = `../${filePath}?t=${Date.now()}`;
-        console.log('Carregando produtos de:', url);
         const response = await fetch(url);
         
         if (!response.ok) throw new Error('Arquivo produtos.json não encontrado');
         
         products = await response.json();
-        console.log('Produtos carregados:', products);
         renderAdminProducts();
     } catch (e) {
         console.error('Erro detalhado:', e);
@@ -89,7 +243,15 @@ async function loadProducts() {
 }
 
 /**
- * Renderiza lista na tabela
+ * Retorna o nome amigável da categoria
+ */
+function getCategoryName(catId) {
+    const found = categories.find(c => c.id === catId);
+    return found ? found.nome : catId;
+}
+
+/**
+ * Renderiza lista na tabela de produtos
  */
 function renderAdminProducts() {
     const tbody = document.getElementById('admin-product-list');
@@ -100,6 +262,7 @@ function renderAdminProducts() {
         tr.innerHTML = `
             <td><img src="${getAdminImgSrc(p.imagem)}" class="thumb" onerror="this.src='../assets/images/uploads/1.jpeg'"></td>
             <td><strong>${p.titulo}</strong></td>
+            <td><span style="background: #fff3e0; color: #ff6b00; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem; font-weight: 600;">${getCategoryName(p.categoria)}</span></td>
             <td>R$ ${parseFloat(p.preco_atual).toFixed(2).replace('.', ',')}</td>
             <td>
                 <button class="btn btn-sm btn-primary" onclick="editProduct('${p.id}')" title="Editar"><i class="fas fa-edit"></i></button>
@@ -111,7 +274,7 @@ function renderAdminProducts() {
 }
 
 /**
- * Abre modal para novo/editar
+ * Abre modal para novo/editar produto
  */
 function showProductModal(product = null) {
     const modal = document.getElementById('product-modal');
@@ -132,15 +295,15 @@ function showProductModal(product = null) {
         document.getElementById('p-descricao').value = product.descricao;
         document.getElementById('p-preco-atual').value = product.preco_atual;
         document.getElementById('p-preco-antigo').value = product.preco_antigo || '';
-        document.getElementById('p-categoria').value = product.categoria;
+        populateCategorySelect(product.categoria);
         document.getElementById('p-imagem').value = product.imagem || '';
         document.getElementById('p-badge').value = product.badge || '';
-        
         document.getElementById('image-preview').src = getAdminImgSrc(product.imagem);
     } else {
         title.innerText = 'Novo Produto';
         document.getElementById('product-form').reset();
         document.getElementById('p-id').value = '';
+        populateCategorySelect(categories[0]?.id || 'abara');
         document.getElementById('p-imagem').value = 'assets/images/uploads/1.jpeg';
         document.getElementById('image-preview').src = '../assets/images/uploads/1.jpeg';
     }
@@ -191,14 +354,14 @@ async function handleImageFileSelect(event) {
     const statusInd = document.getElementById('upload-status-indicator');
     if (statusInd) {
         statusInd.style.display = 'block';
-        statusInd.innerHTML = '<span style="color:#666;"><i class="fas fa-spinner fa-spin"></i> Processando foto...</span>';
+        statusInd.innerHTML = '<span style="color:#666;"><i class="fas fa-spinner fa-spin"></i> Processando foto da galeria...</span>';
     }
 
     const reader = new FileReader();
     reader.onload = async (e) => {
         const rawDataUrl = e.target.result;
         
-        // Comprime para ficar ultra rápido no celular (~80KB a 120KB)
+        // Comprime para ficar ultra leve e rápido no celular
         const compressedDataUrl = await compressImage(rawDataUrl, 1000, 0.85);
         
         // Atualiza a pré-visualização instantaneamente
@@ -220,7 +383,7 @@ async function handleImageFileSelect(event) {
 
         const sizeKb = (base64Pure.length * 0.75 / 1024).toFixed(0);
         if (statusInd) {
-            statusInd.innerHTML = `<span class="badge-upload-status"><i class="fas fa-check"></i> Foto pronta (${sizeKb} KB) &bull; ${cleanName}</span>`;
+            statusInd.innerHTML = `<span class="badge-upload-status"><i class="fas fa-check"></i> Foto pronta da galeria (${sizeKb} KB) &bull; ${cleanName}</span>`;
         }
     };
     reader.readAsDataURL(file);
@@ -235,7 +398,7 @@ function selectPresetImage(path) {
     const statusInd = document.getElementById('upload-status-indicator');
     if (statusInd) {
         statusInd.style.display = 'block';
-        statusInd.innerHTML = `<span class="badge-upload-status"><i class="fas fa-check"></i> Foto existente selecionada</span>`;
+        statusInd.innerHTML = `<span class="badge-upload-status"><i class="fas fa-check"></i> Foto selecionada</span>`;
     }
 }
 
@@ -279,7 +442,7 @@ function handleProductSubmit(e) {
 
     renderAdminProducts();
     closeModal();
-    alert('✅ Produto salvo na lista local!\n\nLembre-se de clicar no botão "Salvar no GitHub" no topo para publicar as novas fotos e produtos no site da Vercel.');
+    alert('✅ Produto salvo na lista local!\n\nLembre-se de clicar em "Salvar no GitHub" no topo para publicar as alterações no site.');
 }
 
 function editProduct(id) {
@@ -312,7 +475,7 @@ function setupGitHub() {
         localStorage.setItem('gh_token', githubToken);
         updateGitHubStatusUI();
         if (githubToken) {
-            alert('✅ Token salvo com sucesso!\nAgora você pode fazer upload de fotos da galeria e salvar produtos.');
+            alert('✅ Token salvo com sucesso!\nAgora você pode publicar fotos, categorias e produtos.');
         } else {
             alert('Token removido.');
         }
@@ -329,7 +492,48 @@ function utf8ToBase64(str) {
 }
 
 /**
- * SALVAR NO GITHUB (API) — Faz upload das imagens pendentes e do cardápio
+ * Função utilitária para atualizar ou criar um arquivo no GitHub via Contents API
+ */
+async function putFileToGitHub(path, contentBase64, commitMsg) {
+    let sha = null;
+    try {
+        const getRes = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}?ref=${branch}`, {
+            headers: {
+                'Authorization': `Bearer ${githubToken}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+        if (getRes.ok) {
+            const data = await getRes.json();
+            sha = data.sha;
+        }
+    } catch (_) {}
+
+    const body = {
+        message: commitMsg,
+        content: contentBase64,
+        branch: branch
+    };
+    if (sha) body.sha = sha;
+
+    const res = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${path}`, {
+        method: 'PUT',
+        headers: {
+            'Authorization': `Bearer ${githubToken}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+        const err = await res.json();
+        throw new Error(`Erro ao salvar ${path}: ${err.message || 'Erro desconhecido'}`);
+    }
+}
+
+/**
+ * SALVAR NO GITHUB (API) — Fotos da Galeria + Categorias + Cardápio
  */
 async function saveToGitHub() {
     if (!githubToken) {
@@ -349,111 +553,36 @@ async function saveToGitHub() {
         const imagePaths = Object.keys(pendingImages);
         const totalImages = imagePaths.length;
 
-        // 1. Upload de cada imagem pendente da galeria para o GitHub
+        // 1. Upload das fotos pendentes da galeria
         if (totalImages > 0) {
             for (let i = 0; i < totalImages; i++) {
                 const imgPath = imagePaths[i];
-                const base64Content = pendingImages[imgPath];
-
                 if (btn) {
                     btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Enviando foto (${i + 1}/${totalImages})...`;
                 }
-
-                // Verifica se já existe para obter o SHA se necessário
-                let imgSha = null;
-                try {
-                    const checkRes = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${imgPath}?ref=${branch}`, {
-                        headers: {
-                            'Authorization': `Bearer ${githubToken}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    });
-                    if (checkRes.ok) {
-                        const checkData = await checkRes.json();
-                        imgSha = checkData.sha;
-                    }
-                } catch (_) {}
-
-                const uploadBody = {
-                    message: `Upload image ${imgPath} via Admin [skip ci]`,
-                    content: base64Content,
-                    branch: branch
-                };
-                if (imgSha) uploadBody.sha = imgSha;
-
-                const uploadRes = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${imgPath}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${githubToken}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(uploadBody)
-                });
-
-                if (!uploadRes.ok) {
-                    const err = await uploadRes.json();
-                    throw new Error(`Falha no upload da foto ${imgPath}: ${err.message || 'Erro desconhecido'}`);
-                }
+                await putFileToGitHub(imgPath, pendingImages[imgPath], `Upload imagem ${imgPath} via Admin [skip ci]`);
             }
-
-            // Limpa as imagens pendentes já enviadas
             pendingImages = {};
             try { sessionStorage.removeItem('pending_images'); } catch (_) {}
         }
 
-        // 2. Upload do arquivo data/produtos.json atualizado
+        // 2. Salvar categorias.json
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando categorias...';
+        }
+        const categoriesJsonStr = JSON.stringify(categories, null, 4);
+        await putFileToGitHub(categoriesFilePath, utf8ToBase64(categoriesJsonStr), 'Update categorias.json via Admin [skip ci]');
+
+        // 3. Salvar produtos.json
         if (btn) {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publicando cardápio...';
         }
+        const productsJsonStr = JSON.stringify(products, null, 4);
+        await putFileToGitHub(filePath, utf8ToBase64(productsJsonStr), 'Update produtos.json via Admin [skip ci]');
 
-        const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}?ref=${branch}`;
-        
-        const getFile = await fetch(apiUrl, {
-            headers: {
-                'Authorization': `Bearer ${githubToken}`,
-                'Accept': 'application/vnd.github.v3+json'
-            }
-        });
-
-        if (!getFile.ok) {
-            let errorMsg = `Erro ${getFile.status}`;
-            try {
-                const errData = await getFile.json();
-                errorMsg = errData.message || errorMsg;
-            } catch (_) {}
-            throw new Error(`Não foi possível ler o arquivo no GitHub: ${errorMsg}\n\nVerifique as permissões do seu token.`);
-        }
-
-        const fileData = await getFile.json();
-        const sha = fileData.sha;
-
-        const jsonString = JSON.stringify(products, null, 4);
-        const content = utf8ToBase64(jsonString);
-
-        const update = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`, {
-            method: 'PUT',
-            headers: {
-                'Authorization': `Bearer ${githubToken}`,
-                'Accept': 'application/vnd.github.v3+json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                message: 'Update produtos.json via Admin Painel [skip ci]',
-                content: content,
-                sha: sha,
-                branch: branch
-            })
-        });
-
-        if (update.ok) {
-            alert('🎉 Fotos e cardápio publicados com sucesso no GitHub!\n\nA Vercel está atualizando o site agora mesmo.');
-        } else {
-            const err = await update.json();
-            alert('❌ Erro ao publicar no GitHub: ' + (err.message || 'Erro desconhecido'));
-        }
+        alert('🎉 Sucesso total!\n\nFotos, categorias e produtos foram publicados no GitHub.\nA Vercel iniciou a atualização automática e o site estará atualizado em instantes!');
     } catch (e) {
-        alert('❌ Erro durante o salvamento:\n' + e.message);
+        alert('❌ Erro durante a publicação no GitHub:\n' + e.message);
     } finally {
         if (btn) {
             btn.innerHTML = originalText;

@@ -39,7 +39,7 @@
             background: #fafafa;
             border: 2px dashed #ddd;
             border-radius: 12px;
-            padding: 1rem;
+            padding: 1.2rem;
             text-align: center;
             margin-bottom: 0.8rem;
             transition: border-color 0.2s;
@@ -49,7 +49,7 @@
         }
         .preview-img {
             max-width: 100%;
-            height: 150px;
+            height: 160px;
             object-fit: cover;
             border-radius: 8px;
             margin-bottom: 0.8rem;
@@ -57,6 +57,7 @@
             margin-left: auto;
             margin-right: auto;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: #eee;
         }
         .preset-thumbs {
             display: flex;
@@ -92,9 +93,9 @@
 
         /* Sidebar Styles */
         .sidebar-title { color: var(--primary); margin-bottom: 2rem; text-align: center; }
-        .nav-link { display: block; padding: 0.8rem; border-radius: 8px; text-decoration: none; text-align: center; margin-bottom: 1rem; font-weight: bold; }
-        .nav-link-site { color: #ccc; margin-top: 2rem; }
-        .nav-link-logout { color: #ff5252; margin-top: 1rem; }
+        .nav-link { display: block; padding: 0.8rem; border-radius: 8px; text-decoration: none; text-align: center; margin-bottom: 0.8rem; font-weight: bold; }
+        .nav-link-site { color: #ccc; margin-top: 1.5rem; }
+        .nav-link-logout { color: #ff5252; margin-top: 0.8rem; }
         
         /* Responsive Media Queries */
         @media (max-width: 768px) {
@@ -130,6 +131,7 @@
             <h2 class="sidebar-title">Admin Nai</h2>
             <nav>
                 <a href="#" class="btn btn-primary nav-link" onclick="showProductModal()"><i class="fas fa-plus"></i> Novo Produto</a>
+                <a href="#" class="btn nav-link" style="background: #444; color: #fff;" onclick="showCategoryModal()"><i class="fas fa-tags"></i> Categorias</a>
                 <a href="../" class="nav-link nav-link-site"><i class="fas fa-external-link-alt"></i> Ver Site</a>
                 <a href="#" class="nav-link nav-link-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</a>
             </nav>
@@ -139,7 +141,10 @@
             <div class="card">
                 <div class="card-header">
                     <h1 style="font-size: 1.5rem;">Gerenciar Cardápio</h1>
-                    <button id="btn-save-github" class="btn btn-primary" onclick="saveToGitHub()"><i class="fas fa-save"></i> Salvar no GitHub</button>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-sm" style="background: #444; color: #fff;" onclick="showCategoryModal()"><i class="fas fa-tags"></i> Editar Categorias</button>
+                        <button id="btn-save-github" class="btn btn-primary" onclick="saveToGitHub()"><i class="fas fa-save"></i> Salvar no GitHub</button>
+                    </div>
                 </div>
                 
                 <div class="github-config" id="github-config-box">
@@ -156,6 +161,7 @@
                             <tr>
                                 <th>Imagem</th>
                                 <th>Título</th>
+                                <th>Categoria</th>
                                 <th>Preço</th>
                                 <th>Ações</th>
                             </tr>
@@ -175,33 +181,41 @@
             <h2 id="modal-title" style="margin-bottom: 1.5rem;">Novo Produto</h2>
             <form id="product-form" onsubmit="handleProductSubmit(event)">
                 <input type="hidden" id="p-id">
+                
                 <div class="form-group">
-                    <label>Título</label>
-                    <input type="text" id="p-titulo" required>
+                    <label>Título do Produto</label>
+                    <input type="text" id="p-titulo" placeholder="Ex: Abará Especial com Camarão" required>
                 </div>
+                
                 <div class="form-group">
                     <label>Descrição</label>
-                    <textarea id="p-descricao" rows="3" required></textarea>
+                    <textarea id="p-descricao" rows="3" placeholder="Ingredientes e detalhes..." required></textarea>
                 </div>
+                
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Preço Atual</label>
-                        <input type="number" step="0.01" id="p-preco-atual" required>
+                        <label>Preço Atual (R$)</label>
+                        <input type="number" step="0.01" id="p-preco-atual" placeholder="10.00" required>
                     </div>
                     <div class="form-group">
-                        <label>Preço Antigo</label>
-                        <input type="number" step="0.01" id="p-preco-antigo">
+                        <label>Preço Antigo (Opcional)</label>
+                        <input type="number" step="0.01" id="p-preco-antigo" placeholder="12.00">
                     </div>
                 </div>
+                
                 <div class="form-group">
                     <label>Categoria</label>
-                    <select id="p-categoria">
-                        <option value="abara">Abará</option>
-                        <option value="acaraje">Acarajé</option>
-                        <option value="porcoes">Porções</option>
-                        <option value="bebidas">Bebidas</option>
-                    </select>
+                    <div style="display: flex; gap: 8px;">
+                        <select id="p-categoria" style="flex: 1;" required>
+                            <!-- Filled dynamically by JS -->
+                        </select>
+                        <button type="button" class="btn btn-sm" style="background: #eee; color: #333;" onclick="showCategoryModal()" title="Gerenciar categorias">
+                            <i class="fas fa-plus"></i> Categorias
+                        </button>
+                    </div>
                 </div>
+
+                <!-- Foto do Produto com Upload da Galeria -->
                 <div class="form-group">
                     <label><i class="fas fa-image"></i> Foto do Produto</label>
                     
@@ -211,7 +225,7 @@
                         <input type="file" id="p-file-input" accept="image/*" style="display: none;" onchange="handleImageFileSelect(event)">
                         
                         <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
-                            <button type="button" class="btn btn-sm btn-primary" onclick="document.getElementById('p-file-input').click()" style="cursor: pointer;">
+                            <button type="button" class="btn btn-sm btn-primary" onclick="document.getElementById('p-file-input').click()" style="cursor: pointer; padding: 10px 16px; font-size: 0.95rem;">
                                 <i class="fas fa-upload"></i> Escolher da Galeria / Fotos
                             </button>
                         </div>
@@ -233,15 +247,58 @@
 
                     <input type="text" id="p-imagem" placeholder="assets/images/uploads/1.jpeg" oninput="updateImagePreviewFromInput()" style="font-size: 0.8rem; background: #fafafa;" title="Caminho ou URL da imagem">
                 </div>
+
                 <div class="form-group">
-                    <label>Selo / Badge</label>
-                    <input type="text" id="p-badge" placeholder="Ex: -10%">
+                    <label>Selo / Destaque (Badge)</label>
+                    <input type="text" id="p-badge" placeholder="Ex: Mais Vendido, -10%, Novidade">
                 </div>
+
                 <div style="display: flex; gap: 10px; margin-top: 2rem;">
                     <button type="button" class="btn" style="background: #ccc; flex: 1;" onclick="closeModal()">Cancelar</button>
                     <button type="submit" class="btn btn-primary" style="flex: 1;">Salvar Item</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="category-modal" class="modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2>Gerenciar Categorias</h2>
+                <button class="close-cart" onclick="closeCategoryModal()" style="font-size: 1.8rem; cursor: pointer;">&times;</button>
+            </div>
+
+            <!-- Adicionar Nova Categoria -->
+            <div style="background: #f9f9f9; padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem;">
+                <label style="font-weight: bold; display: block; margin-bottom: 8px;">Adicionar Nova Categoria</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="new-cat-name" placeholder="Ex: Licores, Doces, Combos..." style="flex: 1; padding: 0.7rem; border: 1px solid #ddd; border-radius: 8px;">
+                    <button type="button" class="btn btn-primary" onclick="handleAddCategory()" style="white-space: nowrap;">
+                        <i class="fas fa-plus"></i> Adicionar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lista de Categorias -->
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome da Categoria</th>
+                            <th>Código (Slug)</th>
+                            <th style="width: 100px;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="category-table-body">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: right;">
+                <button type="button" class="btn" style="background: #ccc;" onclick="closeCategoryModal()">Fechar</button>
+            </div>
         </div>
     </div>
 

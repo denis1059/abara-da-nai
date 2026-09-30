@@ -1,20 +1,52 @@
 let cart = [];
 let allProducts = [];
+let allCategories = [];
 let activeCategory = 'todas';
 
 /**
  * Inicialização
  */
 document.addEventListener('DOMContentLoaded', () => {
+    loadCategories();
     loadProducts();
 });
+
+/**
+ * Carrega categorias dinâmicas
+ */
+async function loadCategories() {
+    try {
+        const response = await fetch('data/categorias.json?t=' + Date.now());
+        if (response.ok) {
+            allCategories = await response.json();
+            renderCategoryButtons();
+        }
+    } catch (e) {
+        console.warn('Usando categorias padrão:', e);
+    }
+}
+
+/**
+ * Renderiza botões de filtro de categoria dinamicamente
+ */
+function renderCategoryButtons() {
+    const container = document.getElementById('category-filters');
+    if (!container || !allCategories.length) return;
+
+    let html = `<button onclick="filterCategory('todas')" class="cat-btn ${activeCategory === 'todas' ? 'active' : ''}">Todos</button>`;
+    allCategories.forEach(cat => {
+        const isActive = activeCategory === cat.id;
+        html += `<button onclick="filterCategory('${cat.id}')" class="cat-btn ${isActive ? 'active' : ''}">${cat.nome}</button>`;
+    });
+    container.innerHTML = html;
+}
 
 /**
  * Carrega produtos do JSON
  */
 async function loadProducts() {
     try {
-        const response = await fetch('data/produtos.json');
+        const response = await fetch('data/produtos.json?t=' + Date.now());
         allProducts = await response.json();
         renderProducts();
     } catch (error) {
@@ -32,7 +64,8 @@ function filterCategory(category) {
     // Atualiza botões
     const buttons = document.querySelectorAll('.cat-btn');
     buttons.forEach(btn => {
-        if (btn.innerText.toLowerCase() === category || (category === 'todas' && btn.innerText.toLowerCase() === 'todos')) {
+        const onclickAttr = btn.getAttribute('onclick') || '';
+        if (onclickAttr.includes(`'${category}'`)) {
             btn.classList.add('active');
         } else {
             btn.classList.remove('active');
