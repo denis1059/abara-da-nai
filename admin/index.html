@@ -83,12 +83,15 @@
             <div class="card">
                 <div class="card-header">
                     <h1 style="font-size: 1.5rem;">Gerenciar Cardápio</h1>
-                    <button class="btn btn-primary" onclick="saveToGitHub()"><i class="fas fa-save"></i> Salvar no GitHub</button>
+                    <button id="btn-save-github" class="btn btn-primary" onclick="saveToGitHub()"><i class="fas fa-save"></i> Salvar no GitHub</button>
                 </div>
                 
-                <div class="github-config">
-                    <strong>Configuração GitHub:</strong> Para salvar as alterações, você precisará de um <em>Token de Acesso</em>.
-                    <a href="#" onclick="setupGitHub()" style="color: var(--primary); font-weight: 600;">Configurar Token</a>
+                <div class="github-config" id="github-config-box">
+                    <strong>Integração GitHub & Vercel:</strong> 
+                    <span id="gh-status" style="margin-left: 8px;">Carregando...</span>
+                    <button class="btn btn-sm btn-primary" onclick="setupGitHub()" style="margin-left: 10px; cursor: pointer;">
+                        <i class="fas fa-key"></i> Configurar Token
+                    </button>
                 </div>
 
                 <div class="table-container">
@@ -159,6 +162,6 @@
         </div>
     </div>
 
-    <script src="/admin/admin.js"></script>
+    <script src="admin.js"></script>
 </body>
 </html>

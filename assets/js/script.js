@@ -64,18 +64,20 @@ function renderProducts() {
         const card = document.createElement('div');
         card.className = 'product-card';
         
-        const priceHtml = p.preco_antigo 
+        const priceHtml = p.preco_antigo && parseFloat(p.preco_antigo) > 0
             ? `<span class="old-price">R$ ${parseFloat(p.preco_antigo).toFixed(2).replace('.', ',')}</span>` 
             : '';
 
+        const imgSrc = p.imagem && p.imagem.trim() !== '' ? p.imagem : 'assets/images/uploads/1.jpeg';
+
         card.innerHTML = `
             <div class="product-image">
-                <img src="${p.imagem}" alt="${p.titulo}">
+                <img src="${imgSrc}" alt="${p.titulo}">
                 ${p.badge ? `<span class="badge">${p.badge}</span>` : ''}
             </div>
             <div class="product-info">
                 <h3>${p.titulo}</h3>
-                <p>${p.descricao}</p>
+                <p>${p.descricao.replace(/\n/g, '<br>')}</p>
                 <div class="price">
                     ${priceHtml}
                     <span class="current-price">R$ ${parseFloat(p.preco_atual).toFixed(2).replace('.', ',')}</span>
@@ -218,17 +220,20 @@ function checkout() {
         return;
     }
 
-    let message = "\uD83C\uDF71 *Pedido - Abará da Nai*\n\n";
-    message += "*Itens:*\n";
+    let message = "Pedido - Abará da Nai\n\n";
+    message += "Itens:\n";
     
     let total = 0;
+    let totalItems = 0;
     cart.forEach(item => {
         const subtotal = item.price * item.quantity;
         total += subtotal;
-        message += `\u2022 ${item.title} (${item.quantity}x) - R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
+        totalItems += item.quantity;
+        message += `* ${item.title} (${item.quantity}x)\n`;
     });
 
-    message += `\n*Total do Pedido: R$ ${total.toFixed(2).replace('.', ',')}*\n\n`;
+    message += `\nTotal de itens: ${totalItems}\n`;
+    message += `Valor total: R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
     message += "Olá, gostaria de fazer esse pedido!";
 
     const phone = "5571984052279";
