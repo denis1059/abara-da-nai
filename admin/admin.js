@@ -43,24 +43,103 @@ function updateGitHubStatusUI() {
 }
 
 /**
- * Verifica login inicial
+ * Alterna visualização de texto/senha no campo do painel
  */
-function checkLogin() {
-    const pass = document.getElementById('admin-pass').value;
-    if (pass === ADMIN_PASS) {
-        document.getElementById('login-screen').style.display = 'none';
-        init();
+function togglePasswordVisibility() {
+    const input = document.getElementById('admin-pass');
+    const icon = document.getElementById('pass-eye-icon');
+    if (!input || !icon) return;
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
     } else {
-        document.getElementById('login-error').style.display = 'block';
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
     }
 }
 
-// Permitir apertar Enter para logar
-document.getElementById('admin-pass')?.addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') {
-        checkLogin();
+/**
+ * Intercepta o envio do formulário de login no teclado do celular (tecla 'Ir' / 'Enter') ou botão
+ */
+function handleLoginSubmit(event) {
+    if (event) {
+        event.preventDefault();
     }
-});
+    checkLogin();
+}
+
+/**
+ * Verifica login inicial (otimizado para celular e desktop)
+ */
+function checkLogin() {
+    const input = document.getElementById('admin-pass');
+    const errorEl = document.getElementById('login-error');
+    const errorText = document.getElementById('login-error-text');
+    const submitBtn = document.getElementById('btn-login-submit');
+
+    if (!input) return;
+
+    // Remove espaços acidentais comuns no teclado de smartphones
+    const pass = (input.value || '').trim();
+
+    if (!pass) {
+        if (errorEl) {
+            if (errorText) errorText.innerText = 'Por favor, digite a senha.';
+            errorEl.style.display = 'block';
+        }
+        input.focus();
+        return;
+    }
+
+    // Aceita 'admin' mesmo com maiúscula acidental do corretor do celular (ex: 'Admin')
+    if (pass.toLowerCase() === ADMIN_PASS.toLowerCase() || pass === ADMIN_PASS) {
+        if (errorEl) errorEl.style.display = 'none';
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Entrando...</span>';
+        }
+
+        try {
+            sessionStorage.setItem('admin_logged', 'true');
+        } catch (_) {}
+
+        const loginScreen = document.getElementById('login-screen');
+        if (loginScreen) {
+            loginScreen.style.display = 'none';
+        }
+
+        init();
+    } else {
+        if (errorEl) {
+            if (errorText) errorText.innerText = 'Senha incorreta! Dica: a senha é admin';
+            errorEl.style.display = 'block';
+        }
+        input.focus();
+    }
+}
+
+// Verifica se já estava logado na sessão ativa
+function checkExistingSession() {
+    try {
+        if (sessionStorage.getItem('admin_logged') === 'true') {
+            const loginScreen = document.getElementById('login-screen');
+            if (loginScreen) {
+                loginScreen.style.display = 'none';
+            }
+            init();
+        }
+    } catch (_) {}
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkExistingSession);
+} else {
+    checkExistingSession();
+}
 
 /**
  * Inicialização do Painel
@@ -228,6 +307,7 @@ function handleDeleteCategory(id) {
  * Carrega produtos do repositório
  */
 async function loadProducts() {
+    const tbody = document.getElementById('admin-product-list');
     try {
         const url = `../${filePath}?t=${Date.now()}`;
         const response = await fetch(url);
@@ -238,7 +318,17 @@ async function loadProducts() {
         renderAdminProducts();
     } catch (e) {
         console.error('Erro detalhado:', e);
-        alert('Erro ao carregar produtos: ' + e.message + '\nVerifique se o arquivo data/produtos.json existe no seu repositório.');
+        if (tbody && (!products || products.length === 0)) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 2rem; color: #c62828;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem;"></i><br><br>
+                        <strong>Erro ao carregar produtos:</strong> ${e.message}<br>
+                        <small style="color: #666;">Verifique se o arquivo data/produtos.json existe no repositório.</small>
+                    </td>
+                </tr>
+            `;
+        }
     }
 }
 
@@ -592,5 +682,8 @@ async function saveToGitHub() {
 }
 
 function logout() {
+    try {
+        sessionStorage.removeItem('admin_logged');
+    } catch (_) {}
     location.reload();
 }
