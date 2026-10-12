@@ -75,5 +75,16 @@
         "imagem": "assets/images/uploads/img_1791843880199.jpg",
         "badge": "✨ Artesanal • Cremoso • Sabor marcante",
         "ativo": true
+    },
+    {
+        "id": "p_1791845115423",
+        "titulo": "Mini pizza",
+        "descricao": "Farinha de trigo ovos sal fermento açúcar  leite",
+        "preco_atual": "20",
+        "preco_antigo": "21.00",
+        "categoria": "petiscos",
+        "imagem": "assets/images/uploads/img_1791844468004.jpg",
+        "badge": "tamanho ideal para saborear grandes momentos!",
+        "ativo": true
     }
 ]
