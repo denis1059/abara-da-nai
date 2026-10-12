@@ -18,5 +18,9 @@
     {
         "id": "doces",
         "nome": "Doces"
+    },
+    {
+        "id": "petiscos",
+        "nome": "Petiscos"
     }
 ]
