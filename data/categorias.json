@@ -14,5 +14,9 @@
     {
         "id": "bebidas",
         "nome": "Bebidas"
+    },
+    {
+        "id": "doces",
+        "nome": "Doces"
     }
 ]
