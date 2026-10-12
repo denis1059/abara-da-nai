@@ -42,5 +42,16 @@
         "imagem": "assets/images/uploads/4.jpeg",
         "badge": "Festa",
         "ativo": true
+    },
+    {
+        "id": "p_1791840114812",
+        "titulo": "Licores artesanais",
+        "descricao": "Frutas e calda pérola",
+        "preco_atual": "22.00",
+        "preco_antigo": "22.00",
+        "categoria": "bebidas",
+        "imagem": "assets/images/uploads/img_1791839925793.jpg",
+        "badge": "Sabor que encanta",
+        "ativo": true
     }
 ]
