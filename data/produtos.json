@@ -53,5 +53,16 @@
         "imagem": "assets/images/uploads/img_1791839925793.jpg",
         "badge": "Sabor que encanta",
         "ativo": true
+    },
+    {
+        "id": "p_1791840715739",
+        "titulo": "Bolinhas de genipapo",
+        "descricao": "Polpa da fruta açúcar e canela",
+        "preco_atual": "10.00",
+        "preco_antigo": "10.00",
+        "categoria": "doces",
+        "imagem": "assets/images/uploads/img_1791840508344.jpg",
+        "badge": "Sabor regional e artesanal",
+        "ativo": true
     }
 ]
