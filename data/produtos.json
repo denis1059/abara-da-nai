@@ -64,5 +64,16 @@
         "imagem": "assets/images/uploads/img_1791840508344.jpg",
         "badge": "Sabor regional e artesanal",
         "ativo": true
+    },
+    {
+        "id": "p_1791843921113",
+        "titulo": "Iicor de maracujá cremoso",
+        "descricao": "🍹 Licor Cremoso de Maracujá — Licores da Nai\nUma combinação irresistível do sabor marcante do maracujá com uma textura cremosa e aveludada. 😍 Feito artesanalmente, com carinho e atenção aos detalhes, é perfeito para quem aprecia sabores especiais e momentos de prazer.",
+        "preco_atual": "40",
+        "preco_antigo": "41.00",
+        "categoria": "bebidas",
+        "imagem": "assets/images/uploads/img_1791843880199.jpg",
+        "badge": "✨ Artesanal • Cremoso • Sabor marcante",
+        "ativo": true
     }
 ]
